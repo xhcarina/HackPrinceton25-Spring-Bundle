@@ -165,7 +165,10 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        contentContainerStyle={[styles.modal, { boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }]}
+        contentContainerStyle={[styles.modal, { 
+          backgroundColor: '#1E1E1E',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+        }]}
       >
         <ScrollView style={styles.scrollView}>
           <Text variant="headlineSmall" style={styles.title}>Profile Settings</Text>
@@ -175,13 +178,14 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
           <View style={styles.imageContainer}>
             <Avatar.Image
               size={120}
-              source={profileImage ? { uri: profileImage } : { uri: 'https://ui-avatars.com/api/?name=' + (fullName || 'User') }}
+              source={profileImage ? { uri: profileImage } : { uri: 'https://ui-avatars.com/api/?name=' + (fullName || 'User') + '&background=2196F3&color=fff' }}
               style={styles.avatar}
             />
             <Button
               mode="outlined"
               onPress={pickImage}
               style={styles.imageButton}
+              textColor="#2196F3"
             >
               Change Photo
             </Button>
@@ -193,6 +197,7 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
             onChangeText={setFullName}
             mode="outlined"
             style={styles.input}
+            theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
           />
 
           <TextInput
@@ -203,6 +208,7 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
             style={styles.input}
             multiline
             numberOfLines={2}
+            theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
           />
 
           <TextInput
@@ -212,6 +218,7 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
             mode="outlined"
             style={styles.input}
             keyboardType="phone-pad"
+            theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
           />
 
           <Button
@@ -219,6 +226,8 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
             onPress={handleSave}
             style={styles.button}
             loading={loading}
+            contentStyle={styles.buttonContent}
+            buttonColor="#2196F3"
           >
             Save Changes
           </Button>
@@ -227,7 +236,7 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
             mode="outlined"
             onPress={handleLogout}
             style={[styles.button, styles.logoutButton]}
-            textColor={theme.colors.error}
+            textColor="#CF6679"
           >
             Log Out
           </Button>
@@ -239,9 +248,8 @@ export default function ProfileSettingsModal({ visible, onDismiss }: ProfileSett
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: 'white',
     margin: 20,
-    borderRadius: 8,
+    borderRadius: 12,
     maxHeight: '80%',
   },
   scrollView: {
@@ -250,6 +258,8 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 20,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   imageContainer: {
     alignItems: 'center',
@@ -257,22 +267,28 @@ const styles = StyleSheet.create({
   },
   avatar: {
     marginBottom: 12,
+    backgroundColor: '#2D2D2D',
   },
   imageButton: {
     marginBottom: 8,
+    borderColor: '#2196F3',
   },
   input: {
     marginBottom: 16,
+    backgroundColor: '#2D2D2D',
   },
   button: {
     marginTop: 8,
     paddingVertical: 6,
   },
+  buttonContent: {
+    paddingVertical: 8,
+  },
   logoutButton: {
-    borderColor: '#B00020',
+    borderColor: '#CF6679',
   },
   error: {
-    color: '#B00020',
+    color: '#CF6679',
     textAlign: 'center',
     marginBottom: 16,
   },
