@@ -12,7 +12,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colorScheme === 'dark' ? '#fff' : '#000',
       }}>
       <Tabs.Screen
-        name="home"
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,

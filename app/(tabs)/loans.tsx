@@ -1,13 +1,54 @@
 import { StyleSheet } from 'react-native';
-import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
+import { Card, Text, List, Divider, Button, useTheme } from 'react-native-paper';
 
 export default function LoansScreen() {
+  const theme = useTheme();
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Loans</ThemedText>
+      <Text variant="headlineMedium" style={styles.title}>Loans</Text>
       <ThemedView style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <ThemedText style={styles.subtitle}>Your Active Loans</ThemedText>
+      
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text variant="titleLarge">Total Outstanding</Text>
+          <Text variant="displaySmall" style={styles.balance}>$15,000</Text>
+          <Text variant="bodyMedium" style={styles.subtitle}>3 Active Loans</Text>
+        </Card.Content>
+      </Card>
+
+      <List.Section>
+        <List.Subheader>Active Loans</List.Subheader>
+        <List.Item
+          title="Home Mortgage"
+          description="Remaining: $10,000"
+          left={props => <List.Icon {...props} icon="home" />}
+          right={props => <Text {...props}>$500/mo</Text>}
+        />
+        <Divider />
+        <List.Item
+          title="Car Loan"
+          description="Remaining: $3,000"
+          left={props => <List.Icon {...props} icon="car" />}
+          right={props => <Text {...props}>$200/mo</Text>}
+        />
+        <Divider />
+        <List.Item
+          title="Personal Loan"
+          description="Remaining: $2,000"
+          left={props => <List.Icon {...props} icon="cash" />}
+          right={props => <Text {...props}>$150/mo</Text>}
+        />
+      </List.Section>
+
+      <Button 
+        mode="contained" 
+        style={styles.button}
+        onPress={() => {}}
+      >
+        Apply for New Loan
+      </Button>
     </ThemedView>
   );
 }
@@ -15,20 +56,28 @@ export default function LoansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 18,
-    marginTop: 10,
+    marginTop: 20,
+    marginBottom: 10,
   },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: '80%',
+    width: '100%',
+  },
+  card: {
+    marginBottom: 20,
+  },
+  balance: {
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  subtitle: {
+    color: '#666',
+  },
+  button: {
+    marginTop: 20,
   },
 }); 
