@@ -61,6 +61,9 @@ export default function Stories() {
       marginBottom: spacing.lg,
       ...shadows.base,
       overflow: 'hidden',
+      maxWidth: 500,
+      alignSelf: 'center',
+      width: '90%',
     },
     image: {
       width: '100%',
@@ -69,33 +72,25 @@ export default function Stories() {
     content: {
       padding: spacing.base,
     },
-    titleRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: spacing.sm,
-    },
-    name: {
-      fontSize: typography.sizes.xl,
-      fontWeight: '600',
-      flex: 1,
-    },
-    locationContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    location: {
-      fontSize: typography.sizes.sm,
-      marginLeft: spacing.xs,
-    },
     storyTitle: {
-      fontSize: typography.sizes.lg,
+      fontSize: typography.sizes.xl,
       fontWeight: '600',
       marginBottom: spacing.sm,
       color: colors.text,
     },
-    purpose: {
-      fontSize: typography.sizes.base,
+    locationContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    location: {
+      fontSize: typography.sizes.sm,
+      marginLeft: spacing.xs,
+      color: colors.textSecondary,
+    },
+    amount: {
+      fontSize: typography.sizes.lg,
+      fontWeight: '600',
       color: colors.primary,
       marginBottom: spacing.sm,
     },
@@ -105,35 +100,9 @@ export default function Stories() {
       marginBottom: spacing.base,
       color: colors.textSecondary,
     },
-    metadata: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: spacing.sm,
-    },
     date: {
       fontSize: typography.sizes.sm,
       color: colors.textSecondary,
-    },
-    interactions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.base,
-    },
-    interactionContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-    },
-    interactionText: {
-      fontSize: typography.sizes.sm,
-      color: colors.textSecondary,
-    },
-    amount: {
-      fontSize: typography.sizes.base,
-      fontWeight: '600',
-      color: colors.text,
-      marginBottom: spacing.sm,
     },
   });
 
@@ -172,40 +141,18 @@ export default function Stories() {
           />
           
           <View style={styles.content}>
-            <View style={styles.titleRow}>
-              <Text style={[styles.name, { color: colors.text }]}>
-                {story.userName}
-              </Text>
-              <View style={styles.locationContainer}>
-                <Ionicons name="location" size={16} color={colors.textSecondary} />
-                <Text style={[styles.location, { color: colors.textSecondary }]}>
-                  {story.userLocation}
-                </Text>
-              </View>
-            </View>
-
             <Text style={styles.storyTitle}>{story.title}</Text>
-            <Text style={styles.purpose}>{story.purpose}</Text>
+            <View style={styles.locationContainer}>
+              <Ionicons name="location" size={16} color={colors.textSecondary} />
+              <Text style={styles.location}>{story.userLocation}</Text>
+            </View>
             <Text style={styles.amount}>
               {story.currency} {story.amount.toLocaleString()}
             </Text>
             <Text style={styles.description}>{story.description}</Text>
-
-            <View style={styles.metadata}>
-              <Text style={styles.date}>
-                {format(story.created_at, 'MMM d, yyyy')}
-              </Text>
-              <View style={styles.interactions}>
-                <View style={styles.interactionContainer}>
-                  <Ionicons name="heart-outline" size={20} color={colors.textSecondary} />
-                  <Text style={styles.interactionText}>{story.likes}</Text>
-                </View>
-                <View style={styles.interactionContainer}>
-                  <Ionicons name="chatbubble-outline" size={20} color={colors.textSecondary} />
-                  <Text style={styles.interactionText}>{story.comments.length}</Text>
-                </View>
-              </View>
-            </View>
+            <Text style={styles.date}>
+              {format(story.created_at, 'MMM d, yyyy')}
+            </Text>
           </View>
         </View>
       ))}

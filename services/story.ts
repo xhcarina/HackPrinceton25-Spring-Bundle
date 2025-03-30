@@ -115,11 +115,6 @@ export const getStories = async (): Promise<Story[]> => {
     for (const docSnapshot of querySnapshot.docs) {
       const data = docSnapshot.data();
       
-      // Get user details
-      const userDocRef = doc(db, 'users', data.user_id);
-      const userDocSnapshot = await getDoc(userDocRef);
-      const userData = userDocSnapshot.data() as UserData | undefined;
-      
       stories.push({
         id: docSnapshot.id,
         title: data.title,
@@ -136,8 +131,8 @@ export const getStories = async (): Promise<Story[]> => {
           ...comment,
           created_at: (comment.created_at as Timestamp).toDate()
         })),
-        userName: userData?.name || 'Anonymous',
-        userLocation: userData?.country || 'Unknown Location'
+        userName: 'Anonymous',
+        userLocation: 'Community Member'
       });
     }
     
