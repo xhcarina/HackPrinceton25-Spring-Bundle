@@ -49,7 +49,7 @@ class Loan:
     monthly_income: float
     debt_to_income_ratio: float
     employment_status: str
-    bundle_id: Optional[str] = None
+    bundle_ids: Optional[List[str]] = None  # Changed from bundle_id to bundle_ids
     approved_at: Optional[datetime] = None
     funded_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
@@ -67,7 +67,7 @@ class Bundle:
     expected_return: float
     risk_score: float
     min_investment: float
-    term_months: int  # Based on the loans within
+    term_months: int
     investor_ids: Optional[List[str]] = None
     funded_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
@@ -95,26 +95,28 @@ class Database:
         """Get all approved loans that haven't been bundled yet"""
         return [
             loan for loan in self.loans.values()
-            if loan.status == LoanStatus.APPROVED and loan.bundle_id is None
+            if loan.status == LoanStatus.APPROVED
         ]
     
     def create_bundle(self, bundle_data: Dict[str, Any]) -> Bundle:
         """Create a new bundle from selected loans"""
-        # Validate that all loans exist and are available
+        # Validate that all loans exist and are approved
         for loan_id in bundle_data['loan_ids']:
             loan = self.loans.get(loan_id)
-            if not loan or loan.status != LoanStatus.APPROVED or loan.bundle_id:
+            if not loan or loan.status not in [LoanStatus.APPROVED, LoanStatus.BUNDLED]:
                 raise ValueError(f"Loan {loan_id} is not available for bundling")
         
         # Create the bundle
         bundle = Bundle(**bundle_data)
         self.bundles[bundle.id] = bundle
         
-        # Update loan statuses
+        # Update loan statuses and bundle references
         for loan_id in bundle.loan_ids:
             loan = self.loans[loan_id]
+            if not loan.bundle_ids:
+                loan.bundle_ids = []
+            loan.bundle_ids.append(bundle.id)
             loan.status = LoanStatus.BUNDLED
-            loan.bundle_id = bundle.id
         
         return bundle
     
@@ -134,12 +136,14 @@ class Database:
         # Add investor to bundle
         if not bundle.investor_ids:
             bundle.investor_ids = []
-        bundle.investor_ids.append(investor_id)
+        if investor_id not in bundle.investor_ids:
+            bundle.investor_ids.append(investor_id)
         
         # Update user's invested bundles
         investor = self.users[investor_id]
         if not investor.invested_bundles:
             investor.invested_bundles = []
-        investor.invested_bundles.append(bundle_id)
+        if bundle_id not in investor.invested_bundles:
+            investor.invested_bundles.append(bundle_id)
         
         return True 
