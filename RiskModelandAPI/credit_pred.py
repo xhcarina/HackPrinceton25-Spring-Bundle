@@ -51,7 +51,7 @@ def load_model_once(model_path=None):
 
 def predict_credit_score(api_data):
     """
-    Predict credit score from API data.
+    Predict default probability from API data.
     
     Args:
         api_data (dict): JSON data from React frontend with the required fields:
@@ -64,7 +64,7 @@ def predict_credit_score(api_data):
             - amount
     
     Returns:
-        float: The predicted credit score (0-100)
+        float: The predicted default probability (0-1, where 1 = 100% probability of default)
     """
     try:
         # Load model if not already loaded
@@ -88,11 +88,11 @@ def predict_credit_score(api_data):
         # Convert to DataFrame (required format for model)
         df = pd.DataFrame([api_data])
         
-        # Make prediction
-        prediction = model.predict(df)
+        # Make prediction - model returns a credit score (0-100)
+        credit_score = model.predict(df)[0]
         
         # Return single score value
-        return float(prediction[0])
+        return float(credit_score)
         
     except Exception as e:
         # Log the error
@@ -100,36 +100,3 @@ def predict_credit_score(api_data):
         # Return a default value or re-raise
         raise
 
-# Example of how this would be used in a Flask or FastAPI endpoint
-def example_api_usage():
-    """Example of how to use this in an API endpoint"""
-    # This is just an example - you would replace this with your actual API framework
-    
-    # Sample data that would come from your React frontend
-    sample_api_data = {
-        'sector': 'Agriculture',
-        'location.country': 'Kenya',
-        'location.geo.level': 'rural_area',
-        'terms.disbursal_currency': 'KES',
-        'terms.loan_amount': 500,
-        'local_amount': 500,
-        'amount': 500
-    }
-    
-    # Get prediction
-    score = predict_credit_score(sample_api_data)
-    
-    # This would be your API response
-    response = {
-        'credit_score': score,
-        'risk_level': 'High Risk' if score < 50 else 'Medium Risk' if score < 75 else 'Low Risk',
-        'approval_recommendation': 'Decline' if score < 50 else 'Review' if score < 75 else 'Approve'
-    }
-    
-    return response
-
-if __name__ == "__main__":
-    # Test the function
-    test_response = example_api_usage()
-    print("API Response Example:")
-    print(test_response) 
