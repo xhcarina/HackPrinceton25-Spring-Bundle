@@ -5,7 +5,7 @@ A revolutionary decentralized microlending platform that combines loan tokenizat
 ## Vision & Overview
 
 HP25-Bundle revolutionizes microlending by:
-- Creating a decentralized marketplace for small loans ($50-$500)
+- Creating a decentralized marketplace for small loans
 - Enabling loan tokenization and bundling for improved liquidity
 - Providing sophisticated risk assessment and resource allocation
 - Empowering borrowers in developing economies while offering investors new opportunities
