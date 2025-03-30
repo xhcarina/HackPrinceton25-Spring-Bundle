@@ -1,16 +1,15 @@
 # HP25-Bundle: Decentralized Microlending Platform
 
-A revolutionary decentralized microlending platform that combines loan tokenization, intelligent bundling, and advanced risk assessment to create a secure and liquid marketplace for microloans.
+A revolutionary microlending platform that combines intelligent loan bundling, advanced risk assessment, and a modern mobile interface for efficient microloan management.
 
-<<<<<<< HEAD
 ## Vision & Overview
 
 HP25-Bundle revolutionizes microlending by:
-- Creating a decentralized marketplace for small loans
-- Enabling loan tokenization and bundling for improved liquidity
+- Creating an efficient marketplace for small loans
+- Enabling intelligent loan bundling for improved management
 - Providing sophisticated risk assessment and resource allocation
 - Empowering borrowers in developing economies while offering investors new opportunities
-- Maintaining securitization innovation while ensuring benefits flow to underserved communities
+- Maintaining transparency while ensuring benefits flow to underserved communities
 
 ## Inspiration
 Our project was inspired by the critical gap in microfinance: while millions of people need small loans for business and personal development, traditional financial systems often fail to serve them efficiently. We drew inspiration from:
@@ -21,57 +20,59 @@ Our project was inspired by the critical gap in microfinance: while millions of 
 
 ## What it does
 HP25-Bundle transforms microfinance by:
-1. **Smart Bundling**: Aggregates small loans into larger, more manageable investment bundles
-2. **Risk Assessment**: Uses advanced AI to evaluate and score loan applications
-3. **Tokenization**: Converts loan bundles into tradeable blockchain tokens
+1. **Smart Bundling**: Aggregates individual loans into managed investment bundles using Firebase
+2. **Risk Assessment**: Uses advanced XGBoost and SHAP analysis for loan evaluation
+3. **Mobile Access**: Provides React Native mobile interface for borrowers and investors
 4. **Market Creation**: Provides a secure platform where:
    - Borrowers can access affordable loans
-   - Investors can trade microloan-backed securities
-   - Risk is distributed through intelligent bundling
-   - Returns are optimized through AI-driven allocation
+   - Investors can manage microloan bundles
+   - Risk is assessed through AI-driven analysis
+   - Returns are tracked through Firebase integration
 
 ## How we built it
-Our platform combines several cutting-edge technologies:
+Our platform combines several modern technologies:
 1. **Risk Assessment Engine**:
    - XGBoost regression model for credit scoring
    - SHAP values for transparent risk explanation
-   - Advanced preprocessing pipeline for data handling
+   - Advanced preprocessing pipeline with sklearn
+   - Automated model retraining capabilities
 
-2. **Bundling Algorithm**:
-   - Intelligent loan grouping based on risk profiles
-   - Diversification optimization
-   - Real-time bundle rebalancing
+2. **Bundling System**:
+   - Firebase-based loan management
+   - Real-time bundle tracking
+   - Firestore database integration
+   - Automated status updates
 
-3. **Frontend Development**:
-   - React-based responsive interface
-   - Real-time updates using Firebase
-   - Secure authentication system
-
-4. **Blockchain Integration**:
-   - Smart contracts for loan tokenization
-   - Decentralized trading capabilities
-   - Secure transaction management
+3. **Mobile Frontend**:
+   - React Native for cross-platform support
+   - Firebase real-time updates
+   - TypeScript implementation
+   - Component-based architecture
 
 ## Challenges we ran into
 1. **Risk Assessment Complexity**:
-   - Handling diverse data sources and formats
-   - Balancing model accuracy with interpretability
-   - Adapting to different regional contexts
+   - Training data preprocessing challenges
+   - Model interpretability requirements
+   - Feature importance analysis
+   - Cross-validation implementation
 
-2. **Bundle Optimization**:
-   - Creating efficient bundling algorithms
-   - Managing real-time bundle updates
-   - Balancing risk and return across bundles
+2. **Firebase Integration**:
+   - Real-time data synchronization
+   - Security rule configuration
+   - Bundle status management
+   - Transaction handling
 
-3. **Technical Integration**:
-   - Coordinating multiple technology stacks
-   - Ensuring seamless communication between components
-   - Maintaining system performance at scale
+3. **Mobile Development**:
+   - Cross-platform compatibility
+   - TypeScript integration
+   - State management
+   - Performance optimization
 
-4. **Regulatory Compliance**:
-   - Navigating different financial regulations
-   - Implementing KYC/AML requirements
-   - Ensuring data privacy compliance
+4. **System Integration**:
+   - API endpoint coordination
+   - Data flow management
+   - Error handling
+   - Testing implementation
 
 ## Accomplishments that we're proud of
 1. **Technical Achievements**:
@@ -126,8 +127,6 @@ Our platform combines several cutting-edge technologies:
    - Development of impact metrics
    - Creation of specialized impact-focused bundles
 
-=======
->>>>>>> c590de002216ed6eba791d88c3e1214c1a07fdef
 ## Core Features
 
 ### For Borrowers
@@ -145,14 +144,11 @@ Our platform combines several cutting-edge technologies:
 ## Project Components
 
 ### 1. Loan Bundling System (`/loan_bundling`)
-- Intelligent loan bundling algorithms
-- Database operations and schema management
-- Firebase integration for real-time data
-- Resource allocation optimization
-- Bundle risk calculation methods:
-  - Weighted Average
-  - Nonlinear Method
-  - Variance-Adjusted Scoring
+- Firebase-based loan management
+- Real-time bundle creation and tracking
+- Firestore database integration
+- Bundle status management
+- Automated loan status updates
 
 ### 2. Risk Assessment Engine (`/RiskModelandAPI`)
 #### Risk Scoring Parameters
