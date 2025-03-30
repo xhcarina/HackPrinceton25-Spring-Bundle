@@ -24,6 +24,8 @@ interface DropdownProps {
   placeholder?: string;
   disabled?: boolean;
   error?: string;
+  style?: object;
+  textStyle?: object;
 }
 
 export function Dropdown({
@@ -34,6 +36,8 @@ export function Dropdown({
   placeholder = 'Select an option',
   disabled = false,
   error,
+  style,
+  textStyle,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { colors, typography, spacing, borderRadius, shadows } = useTheme();
@@ -125,7 +129,7 @@ export function Dropdown({
         onPress={() => !disabled && setIsOpen(true)}
         activeOpacity={0.7}
       >
-        <Text style={styles.selectedText}>
+        <Text style={[styles.selectedText, textStyle]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
         <Ionicons

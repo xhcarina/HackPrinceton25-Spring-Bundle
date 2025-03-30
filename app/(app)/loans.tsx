@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text } from '../../components/Themed';
 import { colors, useTheme } from '../../constants/theme';
@@ -10,13 +10,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { z } from 'zod';
 import { Dropdown } from '../../components/ui/Dropdown';
+import { getLoans } from '../../services/loan';
 
 const MAX_AMOUNT = 10000;
 const MAX_DURATION_WEEKS = 104; // 2 years
 
 export default function LoansScreen() {
   const { colors, spacing } = useTheme();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -28,7 +29,7 @@ export default function LoansScreen() {
     loan_duration: false,
   });
   const [newLoan, setNewLoan] = useState<NewLoanInput>({
-    purpose: '',
+    purpose: 'Personal Use',
     loaned_amount: '',
     loan_duration: '',
     payment_schedule: 'monthly',
@@ -39,35 +40,38 @@ export default function LoansScreen() {
     interestRate: 0,
     monthlyPayment: 0,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchLoans();
+  const loadLoans = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const userLoans = await getLoans(user.id);
+      setLoans(userLoans);
+    } catch (error) {
+      console.error('Error loading loans:', error);
+      // Handle error
     }
   }, [user?.id]);
 
-  const fetchLoans = async () => {
+  const handleRefresh = useCallback(async () => {
     try {
-      if (!user?.id) {
-        console.log('No user ID available yet');
-        return;
-      }
-
-      const loansRef = collection(db, 'loans');
-      const q = query(loansRef, where('user_id', '==', user.id));
-      const querySnapshot = await getDocs(q);
-      
-      const loanData: Loan[] = [];
-      querySnapshot.forEach((doc) => {
-        loanData.push({ id: doc.id, ...doc.data() } as Loan);
-      });
-      
-      setLoans(loanData);
+      setIsLoading(true);
+      // Refresh both user data (for balance) and loans
+      await Promise.all([
+        refreshUser(),
+        loadLoans()
+      ]);
     } catch (error) {
-      console.error('Error fetching loans:', error);
-      Alert.alert('Error', 'Failed to fetch loans. Please try again.');
+      console.error('Error refreshing data:', error);
+      // Handle error
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [refreshUser, loadLoans]);
+
+  useEffect(() => {
+    loadLoans();
+  }, [loadLoans]);
 
   const calculateLoanTerms = (amount: number, duration: number) => {
     // Simple interest calculation (you might want to use a more complex formula)
@@ -166,14 +170,14 @@ export default function LoansScreen() {
       setIsModalVisible(false);
       setCurrentStep(1);
       setNewLoan({
-        purpose: '',
+        purpose: 'Personal Use',
         loaned_amount: '',
         loan_duration: '',
         payment_schedule: 'monthly',
         currency: 'USD',
       });
       setTermsAccepted(false);
-      fetchLoans();
+      loadLoans();
       Alert.alert('Success', 'Loan application submitted successfully');
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -215,57 +219,73 @@ export default function LoansScreen() {
       </Text>
       
       <View>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: colors.background, color: colors.text },
-            touchedFields.purpose && errors.purpose && styles.inputError
-          ]}
-          placeholder="Purpose"
-          placeholderTextColor={colors.textSecondary}
+        <Dropdown
+          label="Purpose"
           value={newLoan.purpose}
-          onChangeText={(text) => handleFieldChange('purpose', text)}
-          multiline
-          numberOfLines={4}
+          onValueChange={(value) => handleFieldChange('purpose', value)}
+          options={[
+            { label: 'Agriculture', value: 'Agriculture' },
+            { label: 'Arts', value: 'Arts' },
+            { label: 'Clothing', value: 'Clothing' },
+            { label: 'Construction', value: 'Construction' },
+            { label: 'Education', value: 'Education' },
+            { label: 'Entertainment', value: 'Entertainment' },
+            { label: 'Food', value: 'Food' },
+            { label: 'Health', value: 'Health' },
+            { label: 'Housing', value: 'Housing' },
+            { label: 'Manufacturing', value: 'Manufacturing' },
+            { label: 'Personal Use', value: 'Personal Use' },
+            { label: 'Retail', value: 'Retail' },
+            { label: 'Services', value: 'Services' },
+            { label: 'Transportation', value: 'Transportation' },
+            { label: 'Wholesale', value: 'Wholesale' }
+          ]}
+          placeholder="Select loan purpose"
         />
         {touchedFields.purpose && errors.purpose && <Text style={styles.errorText}>{errors.purpose}</Text>}
       </View>
       
       <View>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: colors.background, color: colors.text },
-            touchedFields.loaned_amount && errors.loaned_amount && styles.inputError
-          ]}
-          placeholder={`Amount (${getCurrencySymbol(newLoan.currency)})`}
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="numeric"
-          value={newLoan.loaned_amount}
-          onChangeText={(text) => {
-            const formatted = text.replace(/[^0-9.]/g, '');
-            handleFieldChange('loaned_amount', formatted);
-          }}
-        />
+        <Text style={[styles.inputLabel, { color: colors.text }]}>Amount</Text>
+        <View style={[
+          styles.inputContainer,
+          { backgroundColor: colors.card },
+          touchedFields.loaned_amount && errors.loaned_amount && styles.inputError
+        ]}>
+          <TextInput
+            style={[styles.styledInput, { color: colors.text }]}
+            placeholder={`Enter amount in ${getCurrencySymbol(newLoan.currency)}`}
+            placeholderTextColor={colors.textSecondary}
+            keyboardType="numeric"
+            value={newLoan.loaned_amount}
+            onChangeText={(text) => {
+              const formatted = text.replace(/[^0-9.]/g, '');
+              handleFieldChange('loaned_amount', formatted);
+            }}
+          />
+        </View>
         {touchedFields.loaned_amount && errors.loaned_amount && <Text style={styles.errorText}>{errors.loaned_amount}</Text>}
       </View>
       
       <View>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: colors.background, color: colors.text },
-            touchedFields.loan_duration && errors.loan_duration && styles.inputError
-          ]}
-          placeholder="Duration (weeks)"
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="numeric"
-          value={newLoan.loan_duration}
-          onChangeText={(text) => {
-            const formatted = text.replace(/[^0-9]/g, '');
-            handleFieldChange('loan_duration', formatted);
-          }}
-        />
+        <Text style={[styles.inputLabel, { color: colors.text }]}>Duration</Text>
+        <View style={[
+          styles.inputContainer,
+          { backgroundColor: colors.card },
+          touchedFields.loan_duration && errors.loan_duration && styles.inputError
+        ]}>
+          <TextInput
+            style={[styles.styledInput, { color: colors.text }]}
+            placeholder="Enter duration in weeks"
+            placeholderTextColor={colors.textSecondary}
+            keyboardType="numeric"
+            value={newLoan.loan_duration}
+            onChangeText={(text) => {
+              const formatted = text.replace(/[^0-9]/g, '');
+              handleFieldChange('loan_duration', formatted);
+            }}
+          />
+        </View>
         {touchedFields.loan_duration && errors.loan_duration && <Text style={styles.errorText}>{errors.loan_duration}</Text>}
       </View>
 
@@ -380,9 +400,7 @@ export default function LoansScreen() {
             <LoanCard
               key={loan.id}
               loan={loan}
-              onPress={() => {
-                // Handle loan details view
-              }}
+              onRefresh={handleRefresh}
             />
           ))
         )}
@@ -471,12 +489,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 24,
   },
-  input: {
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  inputContainer: {
     width: '100%',
     height: 48,
     borderRadius: 8,
     paddingHorizontal: 16,
     marginBottom: 12,
+    justifyContent: 'center',
+  },
+  styledInput: {
+    fontSize: 16,
+    height: '100%',
   },
   termsContainer: {
     gap: 12,

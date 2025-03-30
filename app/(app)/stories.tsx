@@ -1,34 +1,36 @@
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../constants/theme';
+import { getStories, Story } from '../../services/story';
+import { format } from 'date-fns';
 
 export default function Stories() {
   const { colors, typography, spacing, borderRadius, shadows } = useTheme();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const stories = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      location: 'Kenya',
-      business: 'Local Artisan Shop',
-      amount: 2500,
-      funded: 1800,
-      image: 'https://picsum.photos/400/300',
-      story: 'Sarah is expanding her artisan shop to reach more customers and employ local craftswomen.',
-      impact: ['Employment for 5 women', 'Preserving local crafts', 'Supporting families'],
-    },
-    {
-      id: 2,
-      name: 'Miguel Rodriguez',
-      location: 'Mexico',
-      business: 'Organic Farm',
-      amount: 3500,
-      funded: 2200,
-      image: 'https://picsum.photos/400/301',
-      story: 'Miguel is scaling his organic farming operation to meet growing demand for sustainable produce.',
-      impact: ['Sustainable farming', 'Local food security', 'Fair wages'],
-    },
-  ];
+  const loadStories = async () => {
+    try {
+      const fetchedStories = await getStories();
+      setStories(fetchedStories);
+    } catch (error) {
+      console.error('Error loading stories:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadStories();
+    setIsRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadStories();
+  }, []);
 
   const styles = StyleSheet.create({
     container: {
@@ -39,11 +41,18 @@ export default function Stories() {
     },
     title: {
       fontSize: typography.sizes['3xl'],
-      fontWeight: '700' as const,
+      fontWeight: '700',
       marginBottom: spacing.sm,
     },
     subtitle: {
       fontSize: typography.sizes.base,
+      color: colors.textSecondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.xl,
     },
     storyCard: {
       backgroundColor: colors.card,
@@ -68,7 +77,7 @@ export default function Stories() {
     },
     name: {
       fontSize: typography.sizes.xl,
-      fontWeight: '600' as const,
+      fontWeight: '600',
       flex: 1,
     },
     locationContainer: {
@@ -79,137 +88,124 @@ export default function Stories() {
       fontSize: typography.sizes.sm,
       marginLeft: spacing.xs,
     },
-    business: {
+    storyTitle: {
+      fontSize: typography.sizes.lg,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+      color: colors.text,
+    },
+    purpose: {
       fontSize: typography.sizes.base,
+      color: colors.primary,
       marginBottom: spacing.sm,
     },
     description: {
       fontSize: typography.sizes.base,
       lineHeight: typography.lineHeights.normal,
       marginBottom: spacing.base,
+      color: colors.textSecondary,
     },
-    fundingContainer: {
-      marginBottom: spacing.base,
-    },
-    fundingBar: {
-      height: 8,
-      backgroundColor: colors.progressBackground,
-      borderRadius: borderRadius.sm,
-      marginBottom: spacing.sm,
-    },
-    fundingProgress: {
-      height: '100%',
-      backgroundColor: colors.progressFill,
-      borderRadius: borderRadius.sm,
-    },
-    fundingDetails: {
+    metadata: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
     },
-    fundingText: {
+    date: {
       fontSize: typography.sizes.sm,
+      color: colors.textSecondary,
     },
-    fundingPercentage: {
-      fontSize: typography.sizes.sm,
-      fontWeight: '600' as const,
-    },
-    impactContainer: {
-      marginBottom: spacing.base,
-    },
-    impactTitle: {
-      fontSize: typography.sizes.base,
-      fontWeight: '600' as const,
-      marginBottom: spacing.sm,
-    },
-    impactItem: {
+    interactions: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: spacing.xs,
+      gap: spacing.base,
     },
-    impactText: {
-      fontSize: typography.sizes.sm,
-      marginLeft: spacing.sm,
-    },
-    button: {
-      backgroundColor: colors.primary,
-      borderRadius: borderRadius.base,
-      padding: spacing.base,
+    interactionContainer: {
+      flexDirection: 'row',
       alignItems: 'center',
+      gap: spacing.xs,
     },
-    buttonText: {
-      color: colors.text,
+    interactionText: {
+      fontSize: typography.sizes.sm,
+      color: colors.textSecondary,
+    },
+    amount: {
       fontSize: typography.sizes.base,
-      fontWeight: '600' as const,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: spacing.sm,
     },
   });
 
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          colors={[colors.primary]}
+        />
+      }
+    >
+      <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Impact Stories</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Meet the entrepreneurs making a difference
+        <Text style={styles.subtitle}>
+          Real stories from our community
         </Text>
       </View>
 
       {stories.map((story) => (
         <View key={story.id} style={styles.storyCard}>
           <Image
-            source={{ uri: story.image }}
+            source={{ uri: story.imageUrl }}
             style={styles.image}
             resizeMode="cover"
           />
           
           <View style={styles.content}>
             <View style={styles.titleRow}>
-              <Text style={[styles.name, { color: colors.text }]}>{story.name}</Text>
+              <Text style={[styles.name, { color: colors.text }]}>
+                {story.userName}
+              </Text>
               <View style={styles.locationContainer}>
                 <Ionicons name="location" size={16} color={colors.textSecondary} />
                 <Text style={[styles.location, { color: colors.textSecondary }]}>
-                  {story.location}
+                  {story.userLocation}
                 </Text>
               </View>
             </View>
 
-            <Text style={[styles.business, { color: colors.primary }]}>{story.business}</Text>
-            <Text style={[styles.description, { color: colors.textSecondary }]}>
-              {story.story}
+            <Text style={styles.storyTitle}>{story.title}</Text>
+            <Text style={styles.purpose}>{story.purpose}</Text>
+            <Text style={styles.amount}>
+              {story.currency} {story.amount.toLocaleString()}
             </Text>
+            <Text style={styles.description}>{story.description}</Text>
 
-            <View style={styles.fundingContainer}>
-              <View style={styles.fundingBar}>
-                <View 
-                  style={[
-                    styles.fundingProgress,
-                    { width: `${(story.funded / story.amount) * 100}%` }
-                  ]} 
-                />
-              </View>
-              <View style={styles.fundingDetails}>
-                <Text style={[styles.fundingText, { color: colors.textSecondary }]}>
-                  ${story.funded} raised of ${story.amount}
-                </Text>
-                <Text style={[styles.fundingPercentage, { color: colors.progressFill }]}>
-                  {Math.round((story.funded / story.amount) * 100)}%
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.impactContainer}>
-              <Text style={[styles.impactTitle, { color: colors.text }]}>Impact</Text>
-              {story.impact.map((item, index) => (
-                <View key={index} style={styles.impactItem}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                  <Text style={[styles.impactText, { color: colors.textSecondary }]}>
-                    {item}
-                  </Text>
+            <View style={styles.metadata}>
+              <Text style={styles.date}>
+                {format(story.created_at, 'MMM d, yyyy')}
+              </Text>
+              <View style={styles.interactions}>
+                <View style={styles.interactionContainer}>
+                  <Ionicons name="heart-outline" size={20} color={colors.textSecondary} />
+                  <Text style={styles.interactionText}>{story.likes}</Text>
                 </View>
-              ))}
+                <View style={styles.interactionContainer}>
+                  <Ionicons name="chatbubble-outline" size={20} color={colors.textSecondary} />
+                  <Text style={styles.interactionText}>{story.comments.length}</Text>
+                </View>
+              </View>
             </View>
-
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Support This Project</Text>
-            </TouchableOpacity>
           </View>
         </View>
       ))}

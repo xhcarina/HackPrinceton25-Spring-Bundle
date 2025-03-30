@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../constants/theme';
+import { BundleTest } from '../../components/BundleTest';
 
 export default function Investments() {
   const { colors, typography, spacing, borderRadius, shadows } = useTheme();
@@ -172,6 +173,7 @@ export default function Investments() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <BundleTest />
       <View style={[styles.header, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>Investment Portfolio</Text>
         

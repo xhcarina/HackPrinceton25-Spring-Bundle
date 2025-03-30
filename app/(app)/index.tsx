@@ -1,33 +1,118 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Alert, TextInput, Linking, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../constants/theme';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../config/firebase';
 import { Button } from '../../components/ui/Button';
 import { User } from '../../types/user';
+import { createPayment, testPayPalCredentials } from '../../services/paypal';
+import { getRecentActivities } from '../../services/activity';
+import { Activity } from '../../types/activity';
+import { getActiveLoansCount } from '../../services/loan';
+import StatsTest from '../../components/StatsTest';
 
 export default function Overview() {
   const { user, signOut } = useAuth();
   const { colors, typography, spacing, borderRadius, shadows } = useTheme();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isPayPalConfigured, setIsPayPalConfigured] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
+  const [activeLoansCount, setActiveLoansCount] = useState<number | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  const loadStats = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const count = await getActiveLoansCount(user.id);
+      setActiveLoansCount(count);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      setActiveLoansCount(0);
+    }
+  }, [user]);
+
+  const loadActivities = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const activities = await getRecentActivities(user.id);
+      setRecentActivity(activities);
+    } catch (error) {
+      console.error('Error loading recent activities:', error);
+      Alert.alert(
+        'Error',
+        'Failed to load recent activities. Please try again later.'
+      );
+    }
+  }, [user]);
+
+  // Initial data loading
+  useEffect(() => {
+    let mounted = true;
+
+    const loadInitialData = async () => {
+      if (!user) return;
+
+      try {
+        setIsLoadingStats(true);
+        setIsLoadingActivity(true);
+
+        // Load both stats and activities concurrently
+        await Promise.all([
+          loadStats(),
+          loadActivities()
+        ]);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        if (mounted) {
+          setIsLoadingStats(false);
+          setIsLoadingActivity(false);
+        }
+      }
+    };
+
+    // Check PayPal configuration
+    try {
+      const isConfigured = testPayPalCredentials();
+      if (mounted) {
+        setIsPayPalConfigured(isConfigured);
+      }
+    } catch (error) {
+      console.error('PayPal configuration error:', error);
+      if (mounted) {
+        setIsPayPalConfigured(false);
+        Alert.alert(
+          'PayPal Configuration Error',
+          'Unable to initialize PayPal. Please try again later.'
+        );
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user, loadStats, loadActivities]);
 
   const stats = {
     totalInvested: 5000,
-    activeLoans: 3,
+    activeLoans: activeLoansCount ?? 0,
     returns: 450,
     riskScore: user?.risk_score || 0,
   };
-
-  const recentActivity = [
-    { type: 'investment', amount: 1000, date: '2024-03-15', status: 'completed' },
-    { type: 'return', amount: 150, date: '2024-03-14', status: 'received' },
-    { type: 'loan', amount: 500, date: '2024-03-13', status: 'active' },
-  ];
 
   const handleImagePick = async () => {
     if (isUploading) return; // Prevent multiple uploads
@@ -77,6 +162,83 @@ export default function Overview() {
     } finally {
       setIsUploading(false);
       setShowProfileModal(true); // Ensure modal stays open
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!isPayPalConfigured) {
+      Alert.alert('Error', 'PayPal is not properly configured. Please try again later.');
+      return;
+    }
+
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid amount greater than 0');
+      return;
+    }
+    
+    try {
+      setIsProcessing(true);
+      setPaymentError(null);
+      
+      console.log('Initiating PayPal payment for amount:', amount);
+      
+      // Create PayPal payment
+      const paymentResponse = await createPayment({
+        amount,
+        currency: 'USD',
+        description: `Deposit to Bundle account`,
+        userId: user?.id || '',
+      });
+
+      console.log('Payment response:', paymentResponse);
+
+      if (!paymentResponse.success || !paymentResponse.approvalUrl) {
+        throw new Error(paymentResponse.error || 'Failed to create payment');
+      }
+
+      // Open PayPal payment URL in browser
+      const supported = await Linking.canOpenURL(paymentResponse.approvalUrl);
+      
+      if (!supported) {
+        throw new Error('Cannot open PayPal URL. Please check your device settings.');
+      }
+
+      console.log('Opening PayPal URL:', paymentResponse.approvalUrl);
+      await Linking.openURL(paymentResponse.approvalUrl);
+      
+      // Show success message and close modal
+      Alert.alert(
+        'Payment Initiated',
+        'Please complete the payment in your browser. Once completed, you will be redirected back to the app.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setShowDepositModal(false);
+              setDepositAmount('');
+            },
+          },
+        ]
+      );
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      const errorMessage = error.message || 'Failed to process payment. Please try again.';
+      setPaymentError(errorMessage);
+      Alert.alert(
+        'Payment Error',
+        errorMessage,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setPaymentError(null);
+            },
+          },
+        ]
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -292,6 +454,58 @@ export default function Overview() {
     transactionButton: {
       flex: 1,
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    depositModal: {
+      width: '90%',
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+      ...shadows.lg,
+    },
+    depositContent: {
+      marginVertical: spacing.xl,
+    },
+    depositLabel: {
+      fontSize: typography.sizes.base,
+      marginBottom: spacing.sm,
+    },
+    amountInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderRadius: borderRadius.base,
+      paddingHorizontal: spacing.base,
+    },
+    currencySymbol: {
+      fontSize: typography.sizes['2xl'],
+      marginRight: spacing.xs,
+    },
+    amountInput: {
+      flex: 1,
+      height: 48,
+      fontSize: typography.sizes['2xl'],
+      paddingVertical: spacing.sm,
+    },
+    confirmButton: {
+      marginTop: spacing.lg,
+    },
+    errorText: {
+      marginTop: spacing.sm,
+      fontSize: typography.sizes.sm,
+    },
+    loadingContainer: {
+      padding: 20,
+      alignItems: 'center',
+    },
+    emptyText: {
+      textAlign: 'center',
+      padding: 20,
+      fontSize: 16,
+    },
   });
 
   const handleLogout = async () => {
@@ -324,24 +538,51 @@ export default function Overview() {
     </View>
   );
 
+  const getActivityIcon = (type: string): keyof typeof Ionicons.glyphMap => {
+    switch (type) {
+      case 'investment':
+        return 'trending-up';
+      case 'return':
+        return 'cash';
+      case 'loan':
+        return 'wallet';
+      case 'deposit':
+        return 'arrow-down';
+      case 'withdrawal':
+        return 'arrow-up';
+      default:
+        return 'cash';
+    }
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
+    return date.toISOString().split('T')[0];
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       {renderHeader()}
 
       <View style={styles.statsContainer}>
-        <View style={[styles.statCard, { backgroundColor: colors.card, ...shadows.base }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Invested</Text>
           <Text style={[styles.statValue, { color: colors.text }]}>${stats.totalInvested}</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: colors.card, ...shadows.base }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active Loans</Text>
-          <Text style={[styles.statValue, { color: colors.text }]}>{stats.activeLoans}</Text>
+          {isLoadingStats ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats.activeLoans}</Text>
+          )}
         </View>
-        <View style={[styles.statCard, { backgroundColor: colors.card, ...shadows.base }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Returns</Text>
           <Text style={[styles.statValue, { color: colors.text }]}>${stats.returns}</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: colors.card, ...shadows.base }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Risk Score</Text>
           <Text style={[styles.statValue, { color: colors.text }]}>{stats.riskScore}</Text>
         </View>
@@ -349,48 +590,52 @@ export default function Overview() {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Activity</Text>
-        {recentActivity.map((activity, index) => (
-          <View 
-            key={index} 
-            style={[
-              styles.activityItem,
-              { borderBottomColor: colors.border }
-            ]}
-          >
-            <View style={[styles.activityIcon, { backgroundColor: colors.surface }]}>
-              <Ionicons
-                name={
-                  activity.type === 'investment'
-                    ? 'trending-up'
-                    : activity.type === 'return'
-                    ? 'cash'
-                    : 'wallet'
-                }
-                size={24}
-                color={colors.primary}
-              />
-            </View>
-            <View style={styles.activityDetails}>
-              <Text style={[styles.activityTitle, { color: colors.text }]}>
-                {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
-              </Text>
-              <Text style={[styles.activityDate, { color: colors.textSecondary }]}>
-                {activity.date}
-              </Text>
-            </View>
-            <View style={styles.activityAmount}>
-              <Text style={[styles.amountText, { color: colors.text }]}>
-                ${activity.amount}
-              </Text>
-              <Text style={[
-                styles.statusText,
-                { color: activity.status === 'completed' ? colors.success : colors.primary }
-              ]}>
-                {activity.status}
-              </Text>
-            </View>
+        {isLoadingActivity ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
-        ))}
+        ) : recentActivity.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            No recent activity
+          </Text>
+        ) : (
+          recentActivity.map((activity, index) => (
+            <View 
+              key={activity.id} 
+              style={[
+                styles.activityItem,
+                { borderBottomColor: colors.border }
+              ]}
+            >
+              <View style={[styles.activityIcon, { backgroundColor: colors.surface }]}>
+                <Ionicons
+                  name={getActivityIcon(activity.type)}
+                  size={24}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.activityDetails}>
+                <Text style={[styles.activityTitle, { color: colors.text }]}>
+                  {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                </Text>
+                <Text style={[styles.activityDate, { color: colors.textSecondary }]}>
+                  {formatDate(activity.date)}
+                </Text>
+              </View>
+              <View style={styles.activityAmount}>
+                <Text style={[styles.amountText, { color: colors.text }]}>
+                  ${activity.amount.toFixed(2)}
+                </Text>
+                <Text style={[
+                  styles.statusText,
+                  { color: activity.status === 'completed' ? colors.success : colors.primary }
+                ]}>
+                  {activity.status}
+                </Text>
+              </View>
+            </View>
+          ))
+        )}
       </View>
 
       <Modal
@@ -430,7 +675,7 @@ export default function Overview() {
               <View style={styles.transactionButtons}>
                 <Button
                   title="Deposit"
-                  onPress={() => Alert.alert('Coming Soon', 'Deposit functionality will be available soon!')}
+                  onPress={() => setShowDepositModal(true)}
                   variant="primary"
                   style={styles.transactionButton}
                 />
@@ -465,6 +710,73 @@ export default function Overview() {
               style={{ marginTop: spacing.xl }}
             />
           </ScrollView>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDepositModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowDepositModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.depositModal, { backgroundColor: colors.background }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Deposit Funds</Text>
+              <TouchableOpacity onPress={() => setShowDepositModal(false)}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.depositContent}>
+              <Text style={[styles.depositLabel, { color: colors.textSecondary }]}>
+                Enter amount to deposit
+              </Text>
+              <View style={styles.amountInputContainer}>
+                <Text style={[styles.currencySymbol, { color: colors.text }]}>$</Text>
+                <TextInput
+                  style={[
+                    styles.amountInput,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.inputBorder,
+                      color: colors.text,
+                    },
+                  ]}
+                  placeholder="0.00"
+                  placeholderTextColor={colors.textTertiary}
+                  value={depositAmount}
+                  onChangeText={setDepositAmount}
+                  keyboardType="decimal-pad"
+                  maxLength={10}
+                  editable={!isProcessing}
+                />
+              </View>
+              {paymentError && (
+                <Text style={[styles.errorText, { color: colors.error }]}>
+                  {paymentError}
+                </Text>
+              )}
+              {!isPayPalConfigured && (
+                <Text style={[styles.errorText, { color: colors.error }]}>
+                  PayPal is not configured. Please try again later.
+                </Text>
+              )}
+              {isProcessing && (
+                <Text style={[styles.errorText, { color: colors.primary }]}>
+                  Processing your payment...
+                </Text>
+              )}
+            </View>
+
+            <Button
+              title={isProcessing ? "Processing..." : "Confirm Deposit"}
+              onPress={handleDeposit}
+              variant="primary"
+              style={styles.confirmButton}
+              disabled={isProcessing || !isPayPalConfigured}
+            />
+          </View>
         </View>
       </Modal>
     </ScrollView>

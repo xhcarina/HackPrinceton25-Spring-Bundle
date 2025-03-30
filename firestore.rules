@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // User rules
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Loan rules
+    match /loans/{loanId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.user_id);
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.user_id) || 
+        (resource.data.request_status == 'approved' && 
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['request_status', 'repay_status', 'updated_at']))
+      );
+    }
+
+    // Bundle rules
+    match /bundles/{bundleId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // Activity rules
+    match /activities/{activityId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.user_id);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.user_id);
+    }
+
+    // Story rules
+    match /stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.user_id);
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.user_id) || 
+        // Allow users to like and comment on stories
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likes', 'comments']))
+      );
+      allow delete: if isAuthenticated() && isOwner(resource.data.user_id);
+    }
+  }
+} 
