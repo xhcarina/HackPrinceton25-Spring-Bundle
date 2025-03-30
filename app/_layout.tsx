@@ -68,7 +68,7 @@ function RootLayoutNav() {
   }
 
   return (
-    <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider value={DefaultTheme}>
       <Slot />
     </NavigationThemeProvider>
   );

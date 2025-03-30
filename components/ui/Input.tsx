@@ -33,7 +33,8 @@ export function Input({
   ...props
 }: InputProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { colors, typography, spacing, borderRadius, shadows } = useTheme();
+  const [isFocused, setIsFocused] = useState(false);
+  const { colors, typography, spacing, borderRadius } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
@@ -48,16 +49,19 @@ export function Input({
     inputContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.base,
+      backgroundColor: colors.inputBackground,
+      borderRadius: borderRadius.lg,
       borderWidth: 1,
-      borderColor: error ? colors.error : colors.border,
+      borderColor: isFocused 
+        ? colors.primary 
+        : error 
+          ? colors.error 
+          : colors.inputBorder,
       paddingHorizontal: spacing.base,
-      ...shadows.sm,
     },
     input: {
       flex: 1,
-      height: 48,
+      height: 44,
       color: colors.text,
       fontSize: typography.sizes.base,
       ...(Platform.OS === 'web' ? { outline: 'none' } : {}),
@@ -70,23 +74,37 @@ export function Input({
       fontSize: typography.sizes.sm,
       marginTop: spacing.xs,
     },
+    activeLabel: {
+      color: colors.primary,
+    }
   });
 
   const togglePasswordVisibility = () => {
+    setIsFocused(true);
     setIsPasswordVisible(!isPasswordVisible);
   };
 
   const actualSecureTextEntry = secureTextEntry && !isPasswordVisible;
 
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, isFocused && styles.activeLabel]}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
           {...props}
           style={[styles.input, inputStyle]}
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={colors.textTertiary}
           secureTextEntry={actualSecureTextEntry}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
         />
         {(rightIcon || secureTextEntry) && (
           <TouchableOpacity
@@ -95,8 +113,8 @@ export function Input({
           >
             <Ionicons
               name={secureTextEntry ? (isPasswordVisible ? 'eye-off' : 'eye') : rightIcon!}
-              size={20}
-              color={colors.textSecondary}
+              size={18}
+              color={isFocused ? colors.primary : colors.textSecondary}
             />
           </TouchableOpacity>
         )}

@@ -3,60 +3,60 @@ import { useColorScheme } from 'react-native';
 
 export const colors = {
   light: {
-    primary: '#00775E',
-    secondary: '#33FFD3',
-    background: '#E5FFF9',
-    surface: '#F2FFFC',
-    text: '#001E18',
-    textSecondary: '#666666',
-    textTertiary: '#999999',
-    border: '#E1E1E1',
-    success: '#34C759',
-    error: '#FF3B30',
-    warning: '#FF9500',
-    info: '#5856D6',
-    card: '#FFFFFF',
-    cardShadow: 'rgba(0, 0, 0, 0.1)',
-    tabBar: '#FFFFFF',
-    tabBarBorder: '#F0F0F0',
-    tabBarActive: '#007AFF',
-    tabBarInactive: '#666666',
-    inputBackground: '#FAFAFA',
-    inputBorder: '#E1E1E1',
-    progressBackground: '#F0F0F0',
-    progressFill: '#34C759',
-    badgeBackground: '#E8F2FF',
-    badgeText: '#007AFF',
-    tagBackground: '#E8F2FF',
-    tagText: '#007AFF',
+    primary: '#00C805',    // Robinhood green
+    secondary: '#85E9FF',  // Bright blue accent
+    background: '#FFFFFF', // Clean white background like Instagram
+    surface: '#F9F9F9',    // Very light gray like Instagram
+    text: '#000000',       // Black text like Instagram
+    textSecondary: '#65676B', // Instagram secondary text
+    textTertiary: '#8E8E93',  // Light gray text
+    border: '#EFEFEF',     // Very light border like Instagram
+    success: '#00C805',    // Robinhood green for success
+    error: '#FF5000',      // Robinhood orange/red for errors
+    warning: '#FFBD00',    // Warm yellow for warnings
+    info: '#1E88E5',       // Info blue 
+    card: '#FFFFFF',       // White cards
+    cardShadow: 'rgba(0, 0, 0, 0.05)', // Lighter shadow
+    tabBar: '#FFFFFF',     // White tab bar
+    tabBarBorder: '#EFEFEF', // Very light border
+    tabBarActive: '#00C805', // Robinhood green for active tabs
+    tabBarInactive: '#AEAEB2', // Light gray for inactive
+    inputBackground: '#FAFAFA', // Instagram input background
+    inputBorder: '#EFEFEF',     // Instagram input border
+    progressBackground: '#F2F2F7', // Light background for progress
+    progressFill: '#00C805',    // Robinhood green for progress
+    badgeBackground: '#E8F2FF', // Light blue background
+    badgeText: '#1E88E5',       // Blue text
+    tagBackground: '#F2F2F7',   // Light background for tags
+    tagText: '#00C805',         // Robinhood green for tag text
   },
   dark: {
-    primary: '#33FFD3',
-    secondary: '#004133',
-    background: '#001E18',
-    surface: '#001813',
-    text: '#E5FFF9',
-    textSecondary: '#EBEBF5',
-    textTertiary: '#8E8E93',
-    border: '#38383A',
-    success: '#32D74B',
-    error: '#FF453A',
-    warning: '#FFD60A',
-    info: '#5E5CE6',
-    card: '#1C1C1E',
-    cardShadow: 'rgba(0, 0, 0, 0.3)',
-    tabBar: '#1C1C1E',
-    tabBarBorder: '#38383A',
-    tabBarActive: '#0A84FF',
-    tabBarInactive: '#8E8E93',
-    inputBackground: '#2C2C2E',
-    inputBorder: '#38383A',
-    progressBackground: '#2C2C2E',
-    progressFill: '#32D74B',
-    badgeBackground: '#2C2C2E',
-    badgeText: '#0A84FF',
-    tagBackground: '#2C2C2E',
-    tagText: '#0A84FF',
+    primary: '#00C805',    // Keep Robinhood green in dark mode
+    secondary: '#004133',  
+    background: '#121212', // Darker background, Instagram dark mode inspired
+    surface: '#1E1E1E',    // Slightly lighter than background
+    text: '#FFFFFF',       // White text
+    textSecondary: '#B0B3B8', // Instagram dark mode secondary text
+    textTertiary: '#8E8E93',  // Light gray text
+    border: '#2C2C2E',     // Dark border
+    success: '#00D80A',    // Slightly brighter green for visibility
+    error: '#FF5000',      // Robinhood orange/red 
+    warning: '#FFBD00',    // Warm yellow
+    info: '#1E88E5',       // Info blue
+    card: '#1E1E1E',       // Dark cards
+    cardShadow: 'rgba(0, 0, 0, 0.3)', // Darker shadow
+    tabBar: '#121212',     // Dark tab bar
+    tabBarBorder: '#2C2C2E', // Dark border
+    tabBarActive: '#00D80A', // Bright green for active tabs
+    tabBarInactive: '#8E8E93', // Gray for inactive
+    inputBackground: '#1E1E1E', // Dark input background
+    inputBorder: '#2C2C2E',     // Dark input border
+    progressBackground: '#2C2C2E', // Dark background for progress
+    progressFill: '#00D80A',    // Bright green for progress
+    badgeBackground: '#1E1E1E', // Dark background
+    badgeText: '#00D80A',       // Green text
+    tagBackground: '#1E1E1E',   // Dark background
+    tagText: '#00D80A',         // Green text
   },
 };
 
@@ -145,10 +145,10 @@ export function useTheme(): ThemeContextType {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = false; // Force light theme regardless of system settings
 
   const theme: ThemeContextType = {
-    colors: isDark ? colors.dark : colors.light,
+    colors: colors.light, // Always use light theme colors
     typography,
     spacing,
     borderRadius,

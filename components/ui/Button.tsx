@@ -35,13 +35,13 @@ export function Button({
   const { colors, typography, spacing, borderRadius, shadows } = useTheme();
 
   const getDarkerColor = (color: string) => {
-    return Color(color).darken(0.2).hex();
+    return Color(color).darken(0.1).hex();
   };
 
   const getGradientColors = (): readonly [string, string] => {
     switch (variant) {
       case 'primary':
-        return [colors.secondary, getDarkerColor(colors.secondary)] as const;
+        return [colors.primary, getDarkerColor(colors.primary)] as const;
       case 'secondary':
         return [colors.surface, getDarkerColor(colors.surface)] as const;
       case 'error':
@@ -53,12 +53,12 @@ export function Button({
 
   const styles = StyleSheet.create({
     base: {
-      borderRadius: borderRadius.base,
+      borderRadius: borderRadius.full,
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'row',
       overflow: 'hidden',
-      ...shadows.base,
+      ...shadows.sm,
     },
     // Sizes
     small: {
@@ -66,16 +66,16 @@ export function Button({
       paddingHorizontal: spacing.base,
     },
     medium: {
-      height: 48,
+      height: 44,
       paddingHorizontal: spacing.lg,
     },
     large: {
-      height: 56,
+      height: 52,
       paddingHorizontal: spacing.xl,
     },
     // States
     disabled: {
-      opacity: 0.7,
+      opacity: 0.6,
     },
     fullWidth: {
       width: '100%',
@@ -90,9 +90,10 @@ export function Button({
     text: {
       fontSize: typography.sizes.base,
       fontWeight: '600',
+      letterSpacing: 0.5,
     },
     textPrimary: {
-      color: colors.text,
+      color: '#FFFFFF',
     },
     textSecondary: {
       color: colors.textSecondary,
@@ -101,17 +102,17 @@ export function Button({
       color: colors.primary,
     },
     textError: {
-      color: colors.text,
+      color: '#FFFFFF',
     },
     // Icon styles
     icon: {
       marginHorizontal: spacing.xs,
     },
     leftIcon: {
-      marginRight: spacing.xs,
+      marginRight: spacing.sm,
     },
     rightIcon: {
-      marginLeft: spacing.xs,
+      marginLeft: spacing.sm,
     },
     // Gradient container
     gradientContainer: {
@@ -125,6 +126,7 @@ export function Button({
     variant === 'outline' && {
       borderWidth: 1,
       borderColor: colors.border,
+      backgroundColor: 'transparent',
     },
     disabled && styles.disabled,
     fullWidth && styles.fullWidth,
@@ -143,8 +145,9 @@ export function Button({
   const iconColor = (() => {
     switch (variant) {
       case 'primary':
+        return '#FFFFFF';
       case 'error':
-        return colors.text;
+        return '#FFFFFF';
       case 'secondary':
         return colors.textSecondary;
       case 'outline':
@@ -159,7 +162,7 @@ export function Button({
       {leftIcon && (
         <Ionicons
           name={leftIcon}
-          size={20}
+          size={18}
           color={iconColor}
           style={styles.leftIcon}
         />
@@ -168,7 +171,7 @@ export function Button({
       {rightIcon && (
         <Ionicons
           name={rightIcon}
-          size={20}
+          size={18}
           color={iconColor}
           style={styles.rightIcon}
         />
@@ -187,13 +190,13 @@ export function Button({
         <LinearGradient
           colors={getGradientColors()}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          end={{ x: 1, y: 0 }}
           style={styles.gradientContainer}
         />
       )}
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator color={iconColor} />
+          <ActivityIndicator color={iconColor} size="small" />
         ) : (
           renderContent()
         )}
