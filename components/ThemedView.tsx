@@ -1,14 +1,49 @@
-import { View, type ViewProps } from 'react-native';
+import React from 'react';
+import { View, ViewProps, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '../constants/theme';
 
-import { useThemeColor } from '@/hooks/useThemeColor';
-
-export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
-};
-
-export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-
-  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
+interface ThemedViewProps extends ViewProps {
+  variant?: 'primary' | 'secondary' | 'card' | 'surface' | 'background';
 }
+
+export function ThemedView({ variant = 'background', style, ...props }: ThemedViewProps) {
+  const { colors } = useTheme();
+
+  const getViewStyle = (): ViewStyle => {
+    switch (variant) {
+      case 'primary':
+        return {
+          backgroundColor: colors.primary,
+        };
+      case 'secondary':
+        return {
+          backgroundColor: colors.secondary,
+        };
+      case 'card':
+        return {
+          backgroundColor: colors.card,
+        };
+      case 'surface':
+        return {
+          backgroundColor: colors.surface,
+        };
+      default:
+        return {
+          backgroundColor: colors.background,
+        };
+    }
+  };
+
+  return (
+    <View
+      style={[styles.view, getViewStyle(), style]}
+      {...props}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+  },
+}); 

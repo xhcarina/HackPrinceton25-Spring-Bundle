@@ -1,40 +1,56 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withTiming,
   withRepeat,
   withSequence,
+  withTiming,
+  withDelay,
+  Easing,
 } from 'react-native-reanimated';
-
-import { ThemedText } from '@/components/ThemedText';
+import { Text } from './Themed';
+import { useTheme } from '../constants/theme';
 
 export function HelloWave() {
-  const rotationAnimation = useSharedValue(0);
+  const { colors } = useTheme();
 
-  useEffect(() => {
-    rotationAnimation.value = withRepeat(
-      withSequence(withTiming(25, { duration: 150 }), withTiming(0, { duration: 150 })),
-      4 // Run the animation 4 times
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotationAnimation.value}deg` }],
-  }));
+  const waveStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          rotate: withRepeat(
+            withSequence(
+              withDelay(500, withTiming('20deg', { duration: 500, easing: Easing.bezier(0.25, 0.1, 0.25, 1) })),
+              withTiming('-20deg', { duration: 500, easing: Easing.bezier(0.25, 0.1, 0.25, 1) }),
+              withTiming('0deg', { duration: 500, easing: Easing.bezier(0.25, 0.1, 0.25, 1) })
+            ),
+            -1,
+            true
+          ),
+        },
+      ],
+    };
+  });
 
   return (
-    <Animated.View style={animatedStyle}>
-      <ThemedText style={styles.text}>👋</ThemedText>
-    </Animated.View>
+    <Text style={styles.container}>
+      Hello
+      <Animated.Text style={[styles.wave, waveStyle, { color: colors.primary }]}>
+        👋
+      </Animated.Text>
+    </Text>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 28,
-    lineHeight: 32,
-    marginTop: -6,
+  container: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-});
+  wave: {
+    fontSize: 24,
+    marginLeft: 8,
+  },
+}); 
