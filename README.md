@@ -2,6 +2,7 @@
 
 A revolutionary decentralized microlending platform that combines loan tokenization, intelligent bundling, and advanced risk assessment to create a secure and liquid marketplace for microloans.
 
+<<<<<<< HEAD
 ## Vision & Overview
 
 HP25-Bundle revolutionizes microlending by:
@@ -125,6 +126,8 @@ Our platform combines several cutting-edge technologies:
    - Development of impact metrics
    - Creation of specialized impact-focused bundles
 
+=======
+>>>>>>> c590de002216ed6eba791d88c3e1214c1a07fdef
 ## Core Features
 
 ### For Borrowers
