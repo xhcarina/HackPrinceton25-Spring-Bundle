@@ -1,9 +1,0 @@
-id,status,funded_amount,paid_amount,sector,borrowers.gender,borrowers.pictured,delinquent,amount,lat,lon,location.country,terms.disbursal_date,paid_date,defaulted_date,terms.scheduled_payments.due_date,terms.disbursal_amount,terms.disbursal_currency,terms.loan_amount
-1,paid,500,500,Agriculture,female,1,0,500,14.5995,120.9842,Philippines,20100601,20100901,,20100901,500,PHP,500
-2,defaulted,1000,200,Retail,male,1,1,1000,13.7565,121.0583,Philippines,20100602,,20100902,20100902,1000,PHP,1000
-3,paid,750,750,Education,female,1,0,750,14.6042,120.9822,Philippines,20100603,20100903,,20100903,750,PHP,750
-4,paid,1200,1200,Food,male,0,0,1200,14.5995,120.9842,Indonesia,20100604,20100904,,20100904,1200,IDR,1200
-6,paid,600,600,Health,female,1,0,600,14.6042,120.9822,Cambodia,20100606,20100906,,20100906,600,KHR,600
-7,defaulted,900,300,Transportation,male,0,1,900,14.5995,120.9842,Cambodia,20100607,,20100907,20100907,900,KHR,900
-8,paid,1500,1500,Manufacturing,female,1,0,1500,13.7565,121.0583,Vietnam,20100608,20100908,,20100908,1500,VND,1500
-9,paid,1100,1100,Construction,male,1,0,1100,14.6042,120.9822,Vietnam,20100609,20100909,,20100909,1100,VND,1100 
