@@ -1,0 +1,3 @@
+id,status,funded_amount,paid_amount,sector,borrowers.gender,borrowers.pictured,delinquent,amount,lat,lon,location.country,terms.disbursal_date,paid_date,defaulted_date,terms.scheduled_payments.due_date,terms.disbursal_amount,terms.disbursal_currency,terms.loan_amount
+5,defaulted,800,100,Services,female,1,1,800,13.7565,121.0583,Indonesia,20100605,,20100905,20100905,800,IDR,800
+10,defaulted,700,150,Retail,female,0,1,700,14.5995,120.9842,Thailand,20100610,,20100910,20100910,700,THB,700 
