@@ -5,7 +5,7 @@ A revolutionary decentralized microlending platform that combines loan tokenizat
 ## Vision & Overview
 
 HP25-Bundle revolutionizes microlending by:
-- Creating a decentralized marketplace for small loans ($50-$500)
+- Creating a decentralized marketplace for small loans
 - Enabling loan tokenization and bundling for improved liquidity
 - Providing sophisticated risk assessment and resource allocation
 - Empowering borrowers in developing economies while offering investors new opportunities
@@ -20,7 +20,7 @@ Our project was inspired by the critical gap in microfinance: while millions of 
 
 ## What it does
 HP25-Bundle transforms microfinance by:
-1. **Smart Bundling**: Aggregates small loans ($50-$500) into larger, more manageable investment bundles
+1. **Smart Bundling**: Aggregates small loans into larger, more manageable investment bundles
 2. **Risk Assessment**: Uses advanced AI to evaluate and score loan applications
 3. **Tokenization**: Converts loan bundles into tradeable blockchain tokens
 4. **Market Creation**: Provides a secure platform where:
