@@ -5,6 +5,15 @@
 
 A revolutionary microlending platform that combines intelligent loan bundling, advanced risk assessment, and a modern mobile interface for efficient microloan management.
 
+## Afterthoughts
+
+- Didn't deploy blockchain(Verbwire) successfully
+- First Hack for two people in the team; Ethical Issues with the fourth teammate
+- Attempted Expo(checked), Modal, and GeminiAPI
+- Very rewarding experience
+- Team of 3
+
+
 ## Vision & Overview
 
 HP25-Bundle revolutionizes microlending by:
@@ -49,29 +58,10 @@ The risk assessment model uses an advanced XGBoost regressor that outputs scores
 
 ##### Risk Score Interpretation
 - 90-100: Excellent (Very Low Risk)
-  - Historical pattern of full repayment
-  - Strongest creditworthiness indicators
-  - Ideal for bundling as anchor loans
-
 - 75-89: Good (Low Risk)
-  - Strong repayment probability
-  - Favorable risk indicators
-  - Reliable bundle components
-
 - 60-74: Moderate (Average Risk)
-  - Acceptable repayment probability
-  - Some risk factors present
-  - Suitable for diversified bundles
-
 - 40-59: Caution (High Risk)
-  - Elevated default probability
-  - Multiple risk factors
-  - Requires risk mitigation strategies
-
 - 0-39: High Caution (Very High Risk)
-  - Significant default probability
-  - Major risk factors present
-  - Not recommended for standard bundles
 
 ##### Score Calculation Factors
 - Sector performance history
@@ -180,16 +170,3 @@ npm start
 - Firebase security rules
 - API authentication
 - User data protection
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact & Support
-
-For technical support or business inquiries, please contact the project maintainers.
-
-## Acknowledgments
-- Duke University for the Kiva loan dataset
-- Google for Firebase and AI services
-- Open-source community contributors 
