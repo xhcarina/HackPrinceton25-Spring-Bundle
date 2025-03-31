@@ -1,4 +1,4 @@
-# Some part are on the master branch the rest are on backup branch. Check: https://github.com/EricChang9/HP25-Bundle/tree/backup
+# Some parts are on the master branch. The rest are on backup branch. Check: https://github.com/EricChang9/HP25-Bundle/tree/backup
 
 # HP25-Bundle: Decentralized Microlending Platform
 
