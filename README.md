@@ -1,4 +1,5 @@
-# Everything is on the backup branch check: https://github.com/EricChang9/HP25-Bundle/tree/backup
+# Everything is on the backup branch: https://github.com/EricChang9/HP25-Bundle/tree/backup
+
 # HP25-Bundle: Decentralized Microlending Platform
 
 A revolutionary microlending platform that combines intelligent loan bundling, advanced risk assessment, and a modern mobile interface for efficient microloan management.
