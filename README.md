@@ -1,7 +1,7 @@
 
 # Models are on the master branch. Most Frontend/Backend are on backup branch. Check: https://github.com/EricChang9/HP25-Bundle/tree/backup
 # HP25-Bundle: Decentralized Microlending Platform
-## Awards: Best Finanicl Hack [Captial One]: Honorable Mention -- Best Bussiness Idea
+## Awards: Best Financial Hack [Sponsored by Capital One] -- Honorable Mention -- Best Bussiness Idea
 
 A revolutionary microlending platform that combines intelligent loan bundling, advanced risk assessment, and a modern mobile interface for efficient microloan management.
 
