@@ -1,7 +1,7 @@
 # HP25-Bundle for HackPrinceton 2025 Spring
 
 **Decentralized Microlending Platform**  
-Capital One Honorable Mention (HackPrinceton 2025)
+Capital One Honorable Mention (sponsored)
 
 ## Links
 - [Devpost Submission](https://devpost.com/software/bundle-dp9ia2)
